@@ -111,11 +111,15 @@ mod tests {
         }
         "#;
         let keystore: T8Keystore = serde_json::from_str(json_data).unwrap();
+        // assert_eq!(
+        //     keystore.account_address,
+        //     TopAddress::T8Address(String::from( // TODO error here, will be convert to T0Address, since enum TopAddress serde as untagged..
+        //         "T800001eea1208209ee21012929fe4ea68fb7278fb7873"
+        //     ))
+        // );
         assert_eq!(
-            keystore.address.as_bytes(),
-            hex::decode("1eea1208209ee21012929fe4ea68fb7278fb7873")
-                .unwrap()
-                .as_slice()
+            keystore.address,
+            String::from("1eea1208209ee21012929fe4ea68fb7278fb7873")
         );
 
         assert_eq!(
