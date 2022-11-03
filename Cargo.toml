@@ -7,6 +7,10 @@ description = "A Rust binary tools for TOP-Chain keystore"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "top_keystore_rs"
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 aes = "0.8.1"
 clap = { version = "4.0.18", features = ["derive"] }
@@ -27,7 +31,7 @@ uuid = { version = "1.1.2", features = ["serde", "v4"] }
 base64 = "0.13.1"
 base58 = "0.2.0"
 ripemd = "0.1.3"
-
+pyo3 = { version = "0.17.3", features = ["extension-module"] }
 
 [[bin]]
 name = "top_keystore_generator"

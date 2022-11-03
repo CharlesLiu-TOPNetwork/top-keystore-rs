@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 mod error;
 mod t0_algorithm;
 mod t0_type;
@@ -10,7 +11,49 @@ use rand::RngCore;
 
 use crate::{t0_algorithm::generate_T0_key_with_args, t8_algorithm::generate_T8_key_with_args};
 
-#[allow(non_snake_case)]
+use pyo3::prelude::*;
+
+#[pyfunction]
+fn py_generate_keystore_T0(pk_hex: String, password: String) -> PyResult<String> {
+    let pk = hex::decode(pk_hex).unwrap();
+    Ok(generate_T0_keystore(&pk, &password, None).unwrap_or_else(|e| e.to_string()))
+}
+
+#[pyfunction]
+fn py_generate_keystore_T8(pk_hex: String, password: String) -> PyResult<String> {
+    let pk = hex::decode(pk_hex).unwrap();
+    Ok(generate_T8_keystore(&pk, &password, None).unwrap_or_else(|e| e.to_string()))
+}
+
+#[pyfunction]
+fn py_generate_keystore_T0_worker(
+    pk_hex: String,
+    password: String,
+    owner_address: String,
+) -> PyResult<String> {
+    let pk = hex::decode(pk_hex).unwrap();
+    Ok(generate_T0_keystore(&pk, &password, Some(owner_address)).unwrap_or_else(|e| e.to_string()))
+}
+
+#[pyfunction]
+fn py_generate_keystore_T8_worker(
+    pk_hex: String,
+    password: String,
+    owner_address: String,
+) -> PyResult<String> {
+    let pk = hex::decode(pk_hex).unwrap();
+    Ok(generate_T8_keystore(&pk, &password, Some(owner_address)).unwrap_or_else(|e| e.to_string()))
+}
+
+#[pymodule]
+fn top_keystore_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(py_generate_keystore_T0, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_keystore_T8, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_keystore_T0_worker, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_keystore_T8_worker, m)?)?;
+    Ok(())
+}
+
 pub fn generate_T0_keystore<PriKBase, S>(
     pk: PriKBase,
     password: S,
@@ -45,7 +88,6 @@ where
     Ok(result)
 }
 
-#[allow(non_snake_case)]
 pub fn generate_T8_keystore<PriK, S>(
     pk: PriK,
     password: S,
