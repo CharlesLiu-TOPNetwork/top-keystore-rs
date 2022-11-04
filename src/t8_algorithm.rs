@@ -126,7 +126,7 @@ where
         public_key: hex_prikey_to_top_base_pubkey(&pk)?,
     };
     if is_miner.is_some() {
-        println!("miner address is {}", top_keystore.address);
+        // println!("miner address is {}", top_keystore.address);
         top_keystore.key_type = KeyType::Worker;
         top_keystore.account_address = TopAddress::T8Address(is_miner.clone().unwrap());
         top_keystore.address = is_miner.unwrap().chars().skip(6).collect();

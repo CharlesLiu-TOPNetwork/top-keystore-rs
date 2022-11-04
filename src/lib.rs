@@ -8,6 +8,7 @@ mod top_utils;
 
 pub use error::KeystoreError;
 use rand::RngCore;
+use std::collections::HashMap;
 
 use crate::{t0_algorithm::generate_T0_key_with_args, t8_algorithm::generate_T8_key_with_args};
 
@@ -95,9 +96,21 @@ where
 
     // println!("base prikey {}", prikey_base);
 
-    let keystore = generate_T0_key_with_args(prikey_base, password, info, salt, iv, is_miner)?;
+    let keystore =
+        generate_T0_key_with_args(prikey_base, password, info, salt, iv, is_miner.clone())?;
 
-    let result = serde_json::to_string(&keystore)?;
+    let mut hash_map = HashMap::new();
+
+    hash_map.insert(
+        String::from("keystore_content"),
+        serde_json::to_string(&keystore)?,
+    );
+    hash_map.insert(
+        String::from("keystore_name"),
+        is_miner.unwrap_or(keystore.account_address.to_string()),
+    );
+
+    let result = serde_json::to_string(&hash_map)?;
 
     Ok(result)
 }
@@ -126,9 +139,20 @@ where
 
     // println!("hex prikey {}", prikey_hex);
 
-    let keystore = generate_T8_key_with_args(prikey_hex, password, salt, iv, is_miner)?;
+    let keystore = generate_T8_key_with_args(prikey_hex, password, salt, iv, is_miner.clone())?;
 
-    let result = serde_json::to_string(&keystore)?;
+    let mut hash_map = HashMap::new();
+
+    hash_map.insert(
+        String::from("keystore_content"),
+        serde_json::to_string(&keystore)?,
+    );
+    hash_map.insert(
+        String::from("keystore_name"),
+        is_miner.unwrap_or(keystore.account_address.to_string()),
+    );
+
+    let result = serde_json::to_string(&hash_map)?;
 
     Ok(result)
 }

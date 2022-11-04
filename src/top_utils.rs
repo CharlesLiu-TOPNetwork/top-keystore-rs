@@ -14,6 +14,15 @@ pub enum TopAddress {
     T8Address(String),
 }
 
+impl TopAddress {
+    pub fn to_string(&self) -> String {
+        match self {
+            TopAddress::T0Address(address) => address.clone(),
+            TopAddress::T8Address(address) => address.clone(),
+        }
+    }
+}
+
 pub type BasePubKey = String;
 
 // pub type T0Address = String;

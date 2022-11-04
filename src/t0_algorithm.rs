@@ -165,7 +165,7 @@ where
         public_key: base_prikey_to_top_base_pubkey(&pk)?,
     };
     if is_miner.is_some() {
-        println!("miner address is {}", base_prikey_to_base_account(&pk)?);
+        // println!("miner address is {}", base_prikey_to_base_account(&pk)?);
         top_keystore.key_type = KeyType::Worker;
         top_keystore.account_address = TopAddress::T0Address(is_miner.unwrap());
     }
