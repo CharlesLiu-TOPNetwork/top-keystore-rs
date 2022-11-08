@@ -98,7 +98,7 @@ pub fn generate_T0_key_with_args<PriKBase, S, INFO, SALT, IV>(
     salt: SALT,
     iv: IV,
     is_miner: Option<String>,
-) -> Result<T0Keystore, KeystoreError>
+) -> Result<(T0Keystore, Option<String>), KeystoreError>
 where
     PriKBase: AsRef<[u8]>,
     S: AsRef<[u8]>,
@@ -166,11 +166,13 @@ where
     };
     if is_miner.is_some() {
         // println!("miner address is {}", base_prikey_to_base_account(&pk)?);
+        let miner_address = base_prikey_to_base_account(&pk)?;
         top_keystore.key_type = KeyType::Worker;
         top_keystore.account_address = TopAddress::T0Address(is_miner.unwrap());
+        return Ok((top_keystore, Some(miner_address)));
     }
 
-    Ok(top_keystore)
+    Ok((top_keystore, None))
 }
 
 #[cfg(test)]

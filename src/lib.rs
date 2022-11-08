@@ -8,11 +8,17 @@ mod top_utils;
 
 pub use error::KeystoreError;
 use rand::RngCore;
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 use crate::{t0_algorithm::generate_T0_key_with_args, t8_algorithm::generate_T8_key_with_args};
 
 use pyo3::prelude::*;
+
+#[derive(Debug, Deserialize, Serialize)]
+struct KeystoreResult {
+    keystore_name: String,
+    keystore_content: String,
+}
 
 #[pyfunction]
 fn py_generate_keystore_T0(pk_hex: String, password: String) -> PyResult<String> {
@@ -99,18 +105,12 @@ where
     let keystore =
         generate_T0_key_with_args(prikey_base, password, info, salt, iv, is_miner.clone())?;
 
-    let mut hash_map = HashMap::new();
+    let keystore_result = KeystoreResult {
+        keystore_name: keystore.1.unwrap_or(keystore.0.account_address.to_string()),
+        keystore_content: serde_json::to_string(&keystore.0)?,
+    };
 
-    hash_map.insert(
-        String::from("keystore_content"),
-        serde_json::to_string(&keystore)?,
-    );
-    hash_map.insert(
-        String::from("keystore_name"),
-        is_miner.unwrap_or(keystore.account_address.to_string()),
-    );
-
-    let result = serde_json::to_string(&hash_map)?;
+    let result = serde_json::to_string(&keystore_result)?;
 
     Ok(result)
 }
@@ -141,18 +141,12 @@ where
 
     let keystore = generate_T8_key_with_args(prikey_hex, password, salt, iv, is_miner.clone())?;
 
-    let mut hash_map = HashMap::new();
+    let keystore_result = KeystoreResult {
+        keystore_name: keystore.1.unwrap_or(keystore.0.account_address.to_string()),
+        keystore_content: serde_json::to_string(&keystore.0)?,
+    };
 
-    hash_map.insert(
-        String::from("keystore_content"),
-        serde_json::to_string(&keystore)?,
-    );
-    hash_map.insert(
-        String::from("keystore_name"),
-        is_miner.unwrap_or(keystore.account_address.to_string()),
-    );
-
-    let result = serde_json::to_string(&hash_map)?;
+    let result = serde_json::to_string(&keystore_result)?;
 
     Ok(result)
 }

@@ -72,7 +72,7 @@ pub fn generate_T8_key_with_args<PriKHex, S, SALT, IV>(
     salt: SALT,
     iv: IV,
     is_miner: Option<String>,
-) -> Result<T8Keystore, KeystoreError>
+) -> Result<(T8Keystore, Option<String>), KeystoreError>
 where
     PriKHex: AsRef<[u8]>,
     S: AsRef<[u8]>,
@@ -127,12 +127,14 @@ where
     };
     if is_miner.is_some() {
         // println!("miner address is {}", top_keystore.address);
+        let miner_address = top_keystore.address;
         top_keystore.key_type = KeyType::Worker;
         top_keystore.account_address = TopAddress::T8Address(is_miner.clone().unwrap());
         top_keystore.address = is_miner.unwrap().chars().skip(6).collect();
+        return Ok((top_keystore, Some(miner_address)));
     }
 
-    Ok(top_keystore)
+    Ok((top_keystore, None))
 }
 
 #[cfg(test)]
