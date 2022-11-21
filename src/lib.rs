@@ -9,8 +9,8 @@ mod top_utils;
 pub use error::KeystoreError;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
-
-use crate::{t0_algorithm::generate_T0_key_with_args, t8_algorithm::generate_T8_key_with_args};
+use t0_algorithm::{decrypt_T0_keystore, generate_T0_key_with_args};
+use t8_algorithm::{decrypt_T8_keystore, generate_T8_key_with_args};
 
 use pyo3::prelude::*;
 
@@ -66,12 +66,24 @@ fn py_generate_keystore_T8_worker(
     }
 }
 
+#[pyfunction]
+fn py_decrypt_T8_keystore(keystore_str: String, password: String) -> PyResult<String> {
+    Ok(decrypt_T8_keystore_file(keystore_str, password).unwrap_or_else(|e| e.to_string()))
+}
+
+#[pyfunction]
+fn py_decrypt_T0_keystore(keystore_str: String, password: String) -> PyResult<String> {
+    Ok(decrypt_T0_keystore_file(keystore_str, password).unwrap_or_else(|e| e.to_string()))
+}
+
 #[pymodule]
 fn top_keystore_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_generate_keystore_T0, m)?)?;
     m.add_function(wrap_pyfunction!(py_generate_keystore_T8, m)?)?;
     m.add_function(wrap_pyfunction!(py_generate_keystore_T0_worker, m)?)?;
     m.add_function(wrap_pyfunction!(py_generate_keystore_T8_worker, m)?)?;
+    m.add_function(wrap_pyfunction!(py_decrypt_T8_keystore, m)?)?;
+    m.add_function(wrap_pyfunction!(py_decrypt_T0_keystore, m)?)?;
     Ok(())
 }
 
@@ -149,4 +161,22 @@ where
     let result = serde_json::to_string(&keystore_result)?;
 
     Ok(result)
+}
+
+pub fn decrypt_T8_keystore_file(
+    keystore: String,
+    password: String,
+) -> Result<String, KeystoreError> {
+    let keystore = serde_json::from_str(&keystore)?;
+    decrypt_T8_keystore(keystore, password)
+}
+
+pub fn decrypt_T0_keystore_file(
+    keystore: String,
+    password: String,
+) -> Result<String, KeystoreError> {
+    // compatible for old `account address`
+    let keystore = keystore.replace("account address", "account_address");
+    let keystore = serde_json::from_str(&keystore)?;
+    decrypt_T0_keystore(keystore, password)
 }
