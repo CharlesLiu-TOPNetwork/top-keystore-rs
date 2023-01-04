@@ -31,7 +31,7 @@ uuid = { version = "1.1.2", features = ["serde", "v4"] }
 base64 = "0.13.1"
 base58 = "0.2.0"
 ripemd = "0.1.3"
-pyo3 = { version = "0.17.3", features = ["extension-module"] }
+pyo3 = { version = "0.17.3", features = ["extension-module"], optional = true }
 
 [[bin]]
 name = "top_keystore_generator"
@@ -40,3 +40,7 @@ path = "./bin/top_keystore_generator.rs"
 # [[bin]]
 # name = "keystore_decryptor"
 # path = "./bin/keystore_decryptor.rs"
+
+[features]
+default = ["pyapi"]
+pyapi = ["pyo3"]

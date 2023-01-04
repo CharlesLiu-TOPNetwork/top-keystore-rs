@@ -12,79 +12,84 @@ use serde::{Deserialize, Serialize};
 use t0_algorithm::{decrypt_T0_keystore, generate_T0_key_with_args};
 use t8_algorithm::{decrypt_T8_keystore, generate_T8_key_with_args};
 
-use pyo3::prelude::*;
-
 #[derive(Debug, Deserialize, Serialize)]
 struct KeystoreResult {
     keystore_name: String,
     keystore_content: String,
 }
 
-#[pyfunction]
-fn py_generate_keystore_T0(pk_hex: String, password: String) -> PyResult<String> {
-    if let Ok(pk) = hex::decode(pk_hex) {
-        Ok(generate_T0_keystore(&pk, &password, None).unwrap_or_else(|e| e.to_string()))
-    } else {
-        Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+#[cfg(feature = "pyapi")]
+mod pyapi {
+
+    use super::*;
+    use pyo3::prelude::*;
+
+    #[pyfunction]
+    fn py_generate_keystore_T0(pk_hex: String, password: String) -> PyResult<String> {
+        if let Ok(pk) = hex::decode(pk_hex) {
+            Ok(generate_T0_keystore(&pk, &password, None).unwrap_or_else(|e| e.to_string()))
+        } else {
+            Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+        }
     }
-}
 
-#[pyfunction]
-fn py_generate_keystore_T8(pk_hex: String, password: String) -> PyResult<String> {
-    if let Ok(pk) = hex::decode(pk_hex) {
-        Ok(generate_T8_keystore(&pk, &password, None).unwrap_or_else(|e| e.to_string()))
-    } else {
-        Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+    #[pyfunction]
+    fn py_generate_keystore_T8(pk_hex: String, password: String) -> PyResult<String> {
+        if let Ok(pk) = hex::decode(pk_hex) {
+            Ok(generate_T8_keystore(&pk, &password, None).unwrap_or_else(|e| e.to_string()))
+        } else {
+            Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+        }
     }
-}
 
-#[pyfunction]
-fn py_generate_keystore_T0_worker(
-    pk_hex: String,
-    password: String,
-    owner_address: String,
-) -> PyResult<String> {
-    if let Ok(pk) = hex::decode(pk_hex) {
-        Ok(generate_T0_keystore(&pk, &password, Some(owner_address))
-            .unwrap_or_else(|e| e.to_string()))
-    } else {
-        Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+    #[pyfunction]
+    fn py_generate_keystore_T0_worker(
+        pk_hex: String,
+        password: String,
+        owner_address: String,
+    ) -> PyResult<String> {
+        if let Ok(pk) = hex::decode(pk_hex) {
+            Ok(generate_T0_keystore(&pk, &password, Some(owner_address))
+                .unwrap_or_else(|e| e.to_string()))
+        } else {
+            Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+        }
     }
-}
 
-#[pyfunction]
-fn py_generate_keystore_T8_worker(
-    pk_hex: String,
-    password: String,
-    owner_address: String,
-) -> PyResult<String> {
-    if let Ok(pk) = hex::decode(pk_hex) {
-        Ok(generate_T8_keystore(&pk, &password, Some(owner_address))
-            .unwrap_or_else(|e| e.to_string()))
-    } else {
-        Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+    #[pyfunction]
+    fn py_generate_keystore_T8_worker(
+        pk_hex: String,
+        password: String,
+        owner_address: String,
+    ) -> PyResult<String> {
+        if let Ok(pk) = hex::decode(pk_hex) {
+            Ok(generate_T8_keystore(&pk, &password, Some(owner_address))
+                .unwrap_or_else(|e| e.to_string()))
+        } else {
+            Ok(String::from("must use hex private key without `0x` prefix like \"0000000000000000000000000000000000000000000000000000000000000001\""))
+        }
     }
-}
 
-#[pyfunction]
-fn py_decrypt_T8_keystore(keystore_str: String, password: String) -> PyResult<String> {
-    Ok(decrypt_T8_keystore_file(keystore_str, password).unwrap_or_else(|e| e.to_string()))
-}
+    #[pyfunction]
+    fn py_decrypt_T8_keystore(keystore_str: String, password: String) -> PyResult<String> {
+        Ok(decrypt_T8_keystore_file(keystore_str, password).unwrap_or_else(|e| e.to_string()))
+    }
 
-#[pyfunction]
-fn py_decrypt_T0_keystore(keystore_str: String, password: String) -> PyResult<String> {
-    Ok(decrypt_T0_keystore_file(keystore_str, password).unwrap_or_else(|e| e.to_string()))
-}
+    #[pyfunction]
+    fn py_decrypt_T0_keystore(keystore_str: String, password: String) -> PyResult<String> {
+        Ok(decrypt_T0_keystore_file(keystore_str, password).unwrap_or_else(|e| e.to_string()))
+    }
 
-#[pymodule]
-fn top_keystore_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(py_generate_keystore_T0, m)?)?;
-    m.add_function(wrap_pyfunction!(py_generate_keystore_T8, m)?)?;
-    m.add_function(wrap_pyfunction!(py_generate_keystore_T0_worker, m)?)?;
-    m.add_function(wrap_pyfunction!(py_generate_keystore_T8_worker, m)?)?;
-    m.add_function(wrap_pyfunction!(py_decrypt_T8_keystore, m)?)?;
-    m.add_function(wrap_pyfunction!(py_decrypt_T0_keystore, m)?)?;
-    Ok(())
+    #[pymodule]
+    fn top_keystore_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+        m.add_function(wrap_pyfunction!(py_generate_keystore_T0, m)?)?;
+        m.add_function(wrap_pyfunction!(py_generate_keystore_T8, m)?)?;
+        m.add_function(wrap_pyfunction!(py_generate_keystore_T0_worker, m)?)?;
+        m.add_function(wrap_pyfunction!(py_generate_keystore_T8_worker, m)?)?;
+        m.add_function(wrap_pyfunction!(py_decrypt_T8_keystore, m)?)?;
+        m.add_function(wrap_pyfunction!(py_decrypt_T0_keystore, m)?)?;
+        Ok(())
+    }
 }
 
 pub fn generate_T0_keystore<PriK, S>(
